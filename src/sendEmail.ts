@@ -1,0 +1,27 @@
+import nodemailer from 'nodemailer';
+
+interface MailData {
+  subject: string;
+  text: string;
+  html?: string;
+}
+
+const sendEmail = async (to: string, data: MailData) => {
+  const transporter = nodemailer.createTransport({
+    service: 'gmail', // หรือจะใช้ SMTP host เช่น smtp.office365.com
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS
+    }
+  });
+
+  await transporter.sendMail({
+    from: `"JSPWEBSITE" <${process.env.SMTP_USER}>`,
+    to,
+    subject: data.subject,
+    text: data.text,
+    html: data.html || data.text
+  });
+};
+
+export default sendEmail;
