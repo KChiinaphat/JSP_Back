@@ -11,9 +11,13 @@
 
   const app: Application = express();
 
+  app.get('/',(req, res)=>{
+    res.send('Backend is running');
+  });
+
   // Middleware
   app.use(cors({
-    origin: ['http://localhost:5173', 'http://192.168.1.228:5173', 'http://JSPMETALWORKS.com'],
+    origin: ['http://localhost:5173', 'http://192.168.1.228:5173', 'http://JSPMETALWORKS.com', 'http://localhost:3000'],
     credentials: true,
   }));
   app.use(express.json());

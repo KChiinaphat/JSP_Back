@@ -8,7 +8,9 @@ interface MailData {
 
 const sendEmail = async (to: string, data: MailData) => {
   const transporter = nodemailer.createTransport({
-    service: 'gmail', // หรือจะใช้ SMTP host เช่น smtp.office365.com
+  host: process.env.STMP_HOST || 'stmp.gmail.com' ,
+  port:Number(process.env.STMP_PORT) || 465,
+    secure: true,
     auth: {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS
