@@ -2,9 +2,9 @@
   "name": "JSP_BACK",
   "version": "1.0.0",
   "scripts": {
-    "start": "node dist/server.js",
+    "dev": "nodemon src/server.ts",
     "build": "tsc",
-    "dev": "ts-node src/server.ts"
+    "start": "node dist/server.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
