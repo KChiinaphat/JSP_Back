@@ -1,4 +1,5 @@
-import nodemailer from 'nodemailer';
+// sendEmail.ts
+import { Resend } from "resend";
 
 interface MailData {
   subject: string;
@@ -6,24 +7,29 @@ interface MailData {
   html?: string;
 }
 
-const sendEmail = async (to: string, data: MailData) => {
-  const transporter = nodemailer.createTransport({
-  host: process.env.STMP_HOST || 'smtp.gmail.com' ,
-  port:Number(process.env.STMP_PORT) || 465,
-    secure: true,
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS
-    }
-  });
+// สร้าง instance Resend ด้วย API Key จาก environment
+const resend = new Resend(process.env.RESEND_API_KEY!);
 
-  await transporter.sendMail({
-    from: `"JSPWEBSITE" <${process.env.SMTP_USER}>`,
-    to,
-    subject: data.subject,
-    text: data.text,
-    html: data.html || data.text
-  });
+const sendEmail = async (data: MailData) => {
+  try {
+    const receiverEmail = process.env.EMAIL_RECEIVER!;
+    if (!receiverEmail) {
+      throw new Error("EMAIL_RECEIVER environment variable is not set");
+    }
+
+    await resend.emails.send({
+      from: "JSP Website <onboarding@resend.dev>", // อีเมลผู้ส่ง
+      to: receiverEmail,                             // ดึงจาก env
+      subject: data.subject,
+      text: data.text,
+      html: data.html || data.text,
+    });
+
+    console.log(`Email sent to ${receiverEmail}`);
+  } catch (error) {
+    console.error("Send email failed:", error);
+    throw error;
+  }
 };
 
 export default sendEmail;
