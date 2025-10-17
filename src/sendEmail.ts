@@ -8,7 +8,7 @@ interface MailData {
 
 const sendEmail = async (to: string, data: MailData) => {
   const transporter = nodemailer.createTransport({
-  host: process.env.STMP_HOST || 'stmp.gmail.com' ,
+  host: process.env.STMP_HOST || 'smtp.gmail.com' ,
   port:Number(process.env.STMP_PORT) || 465,
     secure: true,
     auth: {
