@@ -17,7 +17,7 @@
 
   // Middleware
   app.use(cors({
-    origin: ['http://localhost:5173', 'http://192.168.1.228:5173', 'http://JSPMETALWORKS.com', 'http://localhost:3000'],
+    origin: ['http://localhost:5173', 'http://192.168.1.228:5173', 'http://jspmetalwork.com', 'http://localhost:3000'],
     credentials: true,
   }));
   app.use(express.json());
