@@ -14,7 +14,7 @@ const sendEmail = async (to: string, data: MailData) => {
   try {
     const email = await resend.emails.send({
       from: process.env.FROM_EMAIL!,
-      to:process.env.TO_EMAIL!,
+      to:process.env.COMPANY_EMAIL!,
       subject: data.subject,
       html: data.html || `<p>${data.text}</p>`,
     });
