@@ -1,4 +1,6 @@
-import nodemailer from 'nodemailer';
+import dotenv from "dotenv";
+dotenv.config();
+import { Resend } from "resend";
 
 interface MailData {
   subject: string;
@@ -6,24 +8,21 @@ interface MailData {
   html?: string;
 }
 
-const sendEmail = async (to: string, data: MailData) => {
-  const transporter = nodemailer.createTransport({
-  host: process.env.STMP_HOST || 'smtp.gmail.com' ,
-  port:Number(process.env.STMP_PORT) || 465,
-    secure: true,
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS
-    }
-  });
+const resend = new Resend(process.env.RESEND_API_KEY!);
 
-  await transporter.sendMail({
-    from: `"JSPWEBSITE" <${process.env.SMTP_USER}>`,
-    to,
-    subject: data.subject,
-    text: data.text,
-    html: data.html || data.text
-  });
+const sendEmail = async (to: string, data: MailData) => {
+  try {
+    const email = await resend.emails.send({
+      from: process.env.FROM_EMAIL!,
+      to,
+      subject: data.subject,
+      html: data.html || `<p>${data.text}</p>`,
+    });
+    console.log("ส่งเมลสำเร็จ:", email);
+  } catch (err) {
+    console.error("ส่งเมลล้มเหลว:", err);
+    throw err;
+  }
 };
 
 export default sendEmail;
