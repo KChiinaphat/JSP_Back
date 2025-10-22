@@ -20,13 +20,27 @@ const upload = multer({
 
 const router: Router = express.Router();
 
+// ✅ ฟังก์ชันอัปโหลดขึ้น Cloudinary พร้อมรักษาความโปร่งใสของ PNG
 const uploadToCloudinary = async (file: Express.Multer.File) => {
-  const resizeBuffer = await sharp(file.buffer)
-    .resize({ width: 800 })
-    .jpeg({ quality: 70 })
-    .toBuffer();
+  let resizeBuffer;
+
+  if (file.mimetype === 'image/png') {
+    // 🔹 ถ้าเป็น PNG → ใช้ sharp().png() เพื่อคง transparency
+    resizeBuffer = await sharp(file.buffer)
+      .resize({ width: 800 })
+      .png({ compressionLevel: 8 })
+      .toBuffer();
+  } else {
+    // 🔹 ถ้าเป็น JPEG → บีบอัดแบบปกติ
+    resizeBuffer = await sharp(file.buffer)
+      .resize({ width: 800 })
+      .jpeg({ quality: 70 })
+      .toBuffer();
+  }
+
+  const format = file.mimetype.split('/')[1];
   const base64Str = resizeBuffer.toString('base64');
-  const dataUri = `data:image/jpeg;base64,${base64Str}`;
+  const dataUri = `data:image/${format};base64,${base64Str}`;
 
   const result = await cloudinary.uploader.upload(dataUri, {
     folder: 'projects',
@@ -39,7 +53,7 @@ const uploadToCloudinary = async (file: Express.Multer.File) => {
   };
 };
 
-
+// ✅ สร้างโปรเจกต์ใหม่
 router.post('/', authenticate, isAdmin, upload.array('images', 5), async (req, res) => {
   console.log('✅ [POST] called');
   console.log('📦 Request Body:', req.body);
@@ -77,7 +91,7 @@ router.post('/', authenticate, isAdmin, upload.array('images', 5), async (req, r
   }
 });
 
-
+// ✅ ดึงโปรเจกต์ทั้งหมด
 router.get('/', async (req, res) => {
   try {
     const { category } = req.query;
@@ -97,7 +111,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-
+// ✅ ดึงโปรเจกต์ตาม ID
 router.get('/:id', async (req, res) => {
   try {
     const project = await Project.findById(req.params.id);
@@ -110,7 +124,7 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-
+// ✅ แก้ไขโปรเจกต์
 router.put('/:id', authenticate, isAdmin, upload.array('images', 5), async (req, res) => {
   try {
     const { category } = req.body;
@@ -122,10 +136,12 @@ router.put('/:id', authenticate, isAdmin, upload.array('images', 5), async (req,
     const project = await Project.findById(req.params.id);
     if (!project) return res.status(404).json({ message: 'Project not found' });
 
+    // ลบรูปเก่าจาก Cloudinary
     for (const img of project.images) {
       await cloudinary.uploader.destroy(img.publicId);
     }
 
+    // อัปโหลดรูปใหม่
     const files = req.files as Express.Multer.File[] || [];
     const images = await Promise.all(files.map(file => uploadToCloudinary(file)));
 
@@ -149,6 +165,7 @@ router.delete('/:id', authenticate, isAdmin, async (req, res) => {
       return res.status(404).json({ message: 'Project not found' });
     }
 
+    // ลบรูปทั้งหมดใน Cloudinary
     for (const img of project.images) {
       await cloudinary.uploader.destroy(img.publicId);
     }
