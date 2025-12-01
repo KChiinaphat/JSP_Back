@@ -11,7 +11,8 @@ import { connectDB } from './config/db';
 const app: Application = express();
 
 // CORS
-const allowedOrigins = ['https://jspmetalwork.com'];
+const allowedOrigins = ['https://jspmetalwork.com'
+  ,'https://www.jspmetalwork.com'];
 const corsOptions: CorsOptions = {
   origin: (origin, callback) => {
     if (!origin || allowedOrigins.includes(origin)) callback(null, true);
